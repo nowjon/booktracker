@@ -12,7 +12,9 @@ COPY --from=build /app/out ./
 COPY Booktracker/init.sql ./
 COPY Booktracker/wwwroot ./wwwroot/
 
-COPY Booktracker/external ./external
+# Create external directory structure for database, logs, and exports
+RUN mkdir -p external/db external/log external/export
+
 EXPOSE 5000
 
 CMD dotnet Booktracker.dll

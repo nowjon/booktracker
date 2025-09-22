@@ -6,7 +6,7 @@ namespace bookTrackerApi {
         //UserID is provided by the sessionKey & bookListID is provided in the request URL.
         public class RequestBody {
 
-            public int? currentPosition { get; set; }
+            public decimal? currentPosition { get; set; }
             public int? journal { get; set; }
             public string? comment { get; set; }
 
@@ -17,7 +17,7 @@ namespace bookTrackerApi {
             public DateTime DateTime { get; set; }
             public int? BookListID { get; set; }
             public int? UserID { get; set; }
-            public int? CurrentPosition { get; set; }
+            public decimal? CurrentPosition { get; set; }
             public int? Journal { get; set; }
             public string? Comment { get; set; }
 
@@ -36,7 +36,7 @@ namespace bookTrackerApi {
         public class ExternalProg {
             public int? Id { get; set; }
             public string? DateTime { get; set; }
-            public int? CurrentPosition { get; set; }
+            public decimal? CurrentPosition { get; set; }
             public int? Journal { get; set; }
             public string? Comment { get; set; }
         }

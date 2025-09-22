@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS `settings` (
 INSERT OR IGNORE INTO `settings` ('name', 'value')
 VALUES ('logging_level', 'all');
 
+INSERT OR IGNORE INTO `settings` ('name', 'value')
+VALUES ('progress_tracking_mode', 'percentage');
+
 -- Table structure for table `users`
 CREATE TABLE IF NOT EXISTS `users` (
   `idusers` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,7 +122,7 @@ CREATE TABLE IF NOT EXISTS 'progress_updates' (
   'iduser' INTEGER NOT NULL,
   'idbookList' INTEGER NOT NULL,
   'dateTime' TEXT NOT NULL,
-  'currentPosition' INTEGER NOT NULL,
+  'currentPosition' REAL NOT NULL,
   'journalID' INTEGER DEFAULT NULL,
   'comment' TEXT,
   FOREIGN KEY ('iduser') REFERENCES 'users' ('idusers') ON DELETE CASCADE,

@@ -39,7 +39,7 @@ namespace bookTrackerApi {
                     while (reader.Read()) {
                         update.Id = reader.GetInt32(0);
                         update.DateTime = reader.GetString(3);
-                        update.CurrentPosition = reader.GetInt32(4);
+                        update.CurrentPosition = reader.GetDecimal(4);
                         update.Journal = reader.IsDBNull(5) ? null: reader.GetInt32(5);
                         update.Comment = reader.IsDBNull(6) ? null: reader.GetString(6);
                     }
@@ -62,7 +62,7 @@ namespace bookTrackerApi {
                         ProgressTypes.ExternalProg update = new();
                         update.Id = reader.GetInt32(0);
                         update.DateTime = reader.GetString(3);
-                        update.CurrentPosition = reader.GetInt32(4);
+                        update.CurrentPosition = reader.GetDecimal(4);
                         update.Journal = reader.IsDBNull(5) ? null: reader.GetInt32(5);
                         update.Comment = reader.IsDBNull(6) ? null: reader.GetString(6);
                         updateList.Add(update);

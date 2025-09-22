@@ -29,6 +29,7 @@ async function setUpBookPage() {
     globalRating = data.rating;
     fillBookData(data);
     fillBookMetaData(data);
+    loadCurrentProgress();
     console.log(data);
 }
 
@@ -246,6 +247,47 @@ function updateStatus(status) {
 
 function refreshPage() {
   location.reload();
+}
+
+/**
+ * Loads and displays the current reading progress for the book
+ */
+async function loadCurrentProgress() {
+    try {
+        const sessionKey = localStorage.getItem("sessionKey");
+        const bookListID = getBookIDfromURL();
+        const response = await fetch(`/api/BookList/${bookListID}/progress?sessionKey=${sessionKey}`);
+        
+        if (response.ok) {
+            const progressList = await response.json();
+            if (progressList && progressList.length > 0) {
+                // Get the most recent progress entry
+                const latestProgress = progressList[progressList.length - 1];
+                displayProgress(latestProgress.currentPosition);
+            }
+        }
+    } catch (error) {
+        console.error("Error loading current progress:", error);
+    }
+}
+
+/**
+ * Displays the progress on the book page
+ */
+function displayProgress(percentage) {
+    const progressSection = document.getElementById("progressSection");
+    const progressBar = document.getElementById("bookProgressBar");
+    const progressText = document.getElementById("progressText");
+    
+    if (percentage > 0) {
+        progressSection.style.display = "block";
+        progressBar.value = percentage;
+        
+        const pageEquivalent = Math.round((percentage / 100) * parseInt(globalPageCount));
+        progressText.textContent = `${Math.round(percentage * 10) / 10}% (page ${pageEquivalent} of ${globalPageCount})`;
+    } else {
+        progressSection.style.display = "none";
+    }
 }
 
 function updateDate(type) {

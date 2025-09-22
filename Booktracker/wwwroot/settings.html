@@ -97,9 +97,24 @@
                               <option value="error_and_warning">Errors and Warnings</option>
                               <option value="error_only">Errors Only</option> 
                           </select>
-                          
                         </div>
-                        <button class="btn" onclick="updateLoggingLevel()">Submit</button>
+                        
+                        <div class="mb-3">
+                          <label class="form-label">Progress Tracking Mode</label>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="progressModeToggle">
+                            <label class="form-check-label" for="progressModeToggle" id="progressModeLabel">
+                              Percentage Mode
+                            </label>
+                          </div>
+                          <small class="form-text text-muted">
+                            Toggle between tracking progress by page number or percentage. 
+                            In percentage mode, you can enter decimal values like 25.5%.
+                          </small>
+                        </div>
+                        
+                        <button class="btn" onclick="updateLoggingLevel()">Update Logging Level</button>
+                        <button class="btn" onclick="updateProgressMode()" style="margin-left: 10px;">Update Progress Mode</button>
                     </div>
                   </div>
                 </div>

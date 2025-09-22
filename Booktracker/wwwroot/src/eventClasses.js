@@ -396,13 +396,17 @@ class ProgressEvent extends BookEvent {
         let progressBar = document.createElement("progress");
         progressBar.classList.add("progress", "progress-lg");
         progressBar.style.maxWidth = "250px";
-        progressBar.max = globalPageCount;
+        progressBar.max = 100; // Always use 100 for percentage
         progressBar.value = progressResponse.currentPosition;
         progressContainer.append(progressBar);
 
         let numbers = document.createElement("p");
         numbers.classList.add("text-secondary", "event-details");
-        numbers.innerText = progressResponse.currentPosition + "/" + globalPageCount
+        
+        // Display percentage and page equivalent
+        const percentage = Math.round(progressResponse.currentPosition * 10) / 10;
+        const pageEquivalent = Math.round((progressResponse.currentPosition / 100) * parseInt(globalPageCount));
+        numbers.innerText = `${percentage}% (page ${pageEquivalent} of ${globalPageCount})`;
         progressContainer.append(numbers);
 
         details.append(progressContainer);

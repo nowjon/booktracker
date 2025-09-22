@@ -91,6 +91,7 @@ function displayLoggingLevel(data) {
 }
 
 getCurrentLoggingLevel();
+getCurrentProgressMode();
 
 function updateLoggingLevel() {
   let sessionKey = localStorage.getItem("sessionKey");
@@ -101,4 +102,49 @@ function updateLoggingLevel() {
   .then(response => response.json())
     .then(data => console.log(data))
     .catch(error => console.error(error));
+}
+
+function getCurrentProgressMode() {
+  let sessionKey = localStorage.getItem("sessionKey");
+  fetch(`/api/settings/progressTrackingMode?sessionKey=${sessionKey}`, {
+    method: 'GET',
+  })
+  .then(response => response.text())
+  .then(data => displayProgressMode(data))
+  .catch(error => console.error(error));
+}
+
+function displayProgressMode(mode) {
+  const toggle = document.getElementById("progressModeToggle");
+  const label = document.getElementById("progressModeLabel");
+  
+  if (mode === 'percentage') {
+    toggle.checked = true;
+    label.textContent = "Percentage Mode";
+  } else {
+    toggle.checked = false;
+    label.textContent = "Page Mode";
+  }
+}
+
+function updateProgressMode() {
+  let sessionKey = localStorage.getItem("sessionKey");
+  let toggle = document.getElementById("progressModeToggle");
+  let mode = toggle.checked ? 'percentage' : 'page';
+  
+  fetch(`/api/settings/progressTrackingMode?mode=${mode}&sessionKey=${sessionKey}`, {
+    method: 'PUT',
+  })
+  .then(response => {
+    if (response.ok) {
+      displayProgressMode(mode);
+      alert(`Progress tracking mode updated to ${mode} mode.`);
+    } else {
+      alert("Failed to update progress tracking mode.");
+    }
+  })
+  .catch(error => {
+    console.error(error);
+    alert("Failed to update progress tracking mode.");
+  });
 }

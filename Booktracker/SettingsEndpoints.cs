@@ -140,6 +140,49 @@ namespace bookTrackerApi {
                 Summary = "Gets the current logging level.",
             });
 
+            app.MapGet("/api/settings/progressTrackingMode", (String sessionKey, HttpContext context) => {
+                string? remoteIp = context.Connection.RemoteIpAddress?.ToString();
+                SessionInfo? currentSession = Program.Sessions.Find(s => s.Session == sessionKey);
+                if (currentSession == null) {
+                    ErrorMessage errorMessage = JsonLog.logAndCreateErrorMessage(ErrorMessages.invalid_sessionKey, "settings_progressTrackingMode", null, remoteIp); 
+                    return Results.BadRequest(errorMessage);
+                }
+                string progressMode = SettingsDB.getProgressTrackingMode();
+                return Results.Ok(progressMode);
+            })
+            .Produces<ErrorMessage>(StatusCodes.Status400BadRequest)
+            .Produces<string>(StatusCodes.Status200OK)
+            .WithTags("Settings")
+            .WithOpenApi(operation => new(operation)
+            {
+                Summary = "Gets the current progress tracking mode (page or percentage).",
+            });
+
+            app.MapPut("/api/settings/progressTrackingMode", (String mode, String sessionKey, HttpContext context) => {
+                string? remoteIp = context.Connection.RemoteIpAddress?.ToString();
+                SessionInfo? currentSession = Program.Sessions.Find(s => s.Session == sessionKey);
+                if (currentSession == null) {
+                    ErrorMessage errorMessage = JsonLog.logAndCreateErrorMessage(ErrorMessages.invalid_sessionKey, "settings_progressTrackingMode", null, remoteIp); 
+                    return Results.BadRequest(errorMessage);
+                }
+                if (mode == "page" || mode == "percentage") {
+                    JsonLog.writeLog($"Progress tracking mode updated to '{mode}'.", "INFO", "settings_progressTrackingMode", currentSession, remoteIp);
+                    SettingsDB.updateProgressTrackingMode(mode);
+                    return Results.Ok();
+                } else {
+                    ErrorMessage errorMessage = JsonLog.logAndCreateErrorMessage(ErrorMessages.invalid_paramter, "settings_progressTrackingMode", null, remoteIp);
+                    return Results.BadRequest(errorMessage);
+                }
+            })
+            .Produces<ErrorMessage>(StatusCodes.Status400BadRequest)
+            .Produces<string>(StatusCodes.Status200OK)
+            .WithTags("Settings")
+            .WithOpenApi(operation => new(operation)
+            {
+                Summary = "Updates the progress tracking mode.",
+                Description = "Parameter 'mode' can be either 'page' or 'percentage'."
+            });
+
         }
 
     }

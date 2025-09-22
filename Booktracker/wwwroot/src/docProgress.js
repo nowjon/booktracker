@@ -2,11 +2,24 @@
 //This is also called anytime a new journal entry is created in journal.js.
 fillJournalEntries()
 
+//Load the progress tracking mode setting
+loadProgressTrackingMode()
+
 /**
- * True if the current page will equal the last page of the book. This
+ * True if the current progress will equal 100% (or last page in page mode). This
  * affects whether or not we update status and date finished. 
  */
-let isLastPage = false;
+let isComplete = false;
+
+/**
+ * Current progress tracking mode: 'page' or 'percentage'
+ */
+let progressMode = 'percentage';
+
+/**
+ * Current progress value (page number or percentage)
+ */
+let currentProgressValue = 0;
 
 /**
  * True if Linked Journal Entry is set to Create New. This is used to
@@ -15,65 +28,192 @@ let isLastPage = false;
 let shouldCreateJournal = false;
 
 /**
- * Called when the currentPage field changes. Validates the input based on the book's
- * page count and also builds dateFinished row if documenting progress on last page.
+ * Loads the progress tracking mode from the server
+ */
+async function loadProgressTrackingMode() {
+    try {
+        const sessionKey = localStorage.getItem("sessionKey");
+        const response = await fetch(`/api/settings/progressTrackingMode?sessionKey=${sessionKey}`);
+        if (response.ok) {
+            progressMode = await response.text();
+            updateProgressModeUI();
+        }
+    } catch (error) {
+        console.error("Error loading progress tracking mode:", error);
+        progressMode = 'percentage'; // default fallback
+        updateProgressModeUI();
+    }
+}
+
+/**
+ * Updates the UI based on the current progress tracking mode
+ */
+function updateProgressModeUI() {
+    const toggle = document.getElementById("progressModeToggle");
+    const label = document.getElementById("progressLabel");
+    const modeLabel = document.getElementById("progressModeLabel");
+    const input = document.getElementById("currentProgress");
+    const completeButton = document.getElementById("completeButton");
+    
+    if (progressMode === 'percentage') {
+        toggle.checked = true;
+        label.textContent = "Progress Percentage";
+        modeLabel.textContent = "Percentage Mode";
+        input.step = "0.1";
+        input.min = "0";
+        input.max = "100";
+        completeButton.textContent = "100%";
+    } else {
+        toggle.checked = false;
+        label.textContent = "Current Page";
+        modeLabel.textContent = "Page Mode";
+        input.step = "1";
+        input.min = "1";
+        input.max = globalPageCount || "1000";
+        completeButton.textContent = "Last Page";
+    }
+    
+    // Clear any existing validation and progress display
+    input.classList.remove("is-invalid");
+    document.getElementById("extraProgressElements").innerHTML = "";
+    document.getElementById("progressText").textContent = "";
+    isComplete = false;
+}
+
+/**
+ * Toggles between page and percentage mode
+ */
+async function toggleProgressMode() {
+    const toggle = document.getElementById("progressModeToggle");
+    const newMode = toggle.checked ? 'percentage' : 'page';
+    
+    try {
+        const sessionKey = localStorage.getItem("sessionKey");
+        const response = await fetch(`/api/settings/progressTrackingMode?mode=${newMode}&sessionKey=${sessionKey}`, {
+            method: 'PUT'
+        });
+        
+        if (response.ok) {
+            progressMode = newMode;
+            updateProgressModeUI();
+        } else {
+            // Revert toggle if update failed
+            toggle.checked = !toggle.checked;
+        }
+    } catch (error) {
+        console.error("Error updating progress tracking mode:", error);
+        // Revert toggle if update failed
+        toggle.checked = !toggle.checked;
+    }
+}
+
+/**
+ * Called when the currentProgress field changes. Validates the input based on the current mode
+ * and also builds dateFinished row if documenting progress at completion.
  * @returns 0 if invalid. 
  */
-function validateCurrentPage(isSubmission) {
-    
-
-    let input = document.getElementById("currentPage");
+function validateCurrentProgress(isSubmission) {
+    let input = document.getElementById("currentProgress");
     input.classList.remove("is-invalid");
-    let currentEntry = input.value;
+    let currentEntry = parseFloat(input.value);
+    currentProgressValue = currentEntry;
 
     if (!isSubmission) {
         //reset to false and only change to true if conditions are met. 
-        isLastPage = false;
+        isComplete = false;
 
-        let div = document.getElementById("extraPageElements");
+        let div = document.getElementById("extraProgressElements");
         div.innerHTML = "";
+        document.getElementById("progressText").textContent = "";
     }
     
-    if (parseInt(currentEntry) > parseInt(globalPageCount)) {
+    if (isNaN(currentEntry)) {
         input.classList.add("is-invalid");
         return 0;
     }
-
-    if (parseInt(currentEntry) <= 0) {
-        input.classList.add("is-invalid");
-        return 0;
+    
+    if (progressMode === 'percentage') {
+        if (currentEntry > 100) {
+            input.classList.add("is-invalid");
+            return 0;
+        }
+        if (currentEntry <= 0) {
+            input.classList.add("is-invalid");
+            return 0;
+        }
+        if (currentEntry == 100 && !isSubmission) {
+            isComplete = true;
+            buildCompletionRows();
+        }
+        // Update progress display
+        if (!isSubmission && currentEntry > 0) {
+            updateProgressDisplay();
+        }
+    } else {
+        // Page mode
+        if (currentEntry > parseInt(globalPageCount)) {
+            input.classList.add("is-invalid");
+            return 0;
+        }
+        if (currentEntry <= 0) {
+            input.classList.add("is-invalid");
+            return 0;
+        }
+        if (currentEntry == parseInt(globalPageCount) && !isSubmission) {
+            isComplete = true;
+            buildCompletionRows();
+        }
+        // Update progress display
+        if (!isSubmission && currentEntry > 0) {
+            updateProgressDisplay();
+        }
     }
-
-    if (parseInt(currentEntry) == parseInt(globalPageCount) && !isSubmission) {
-        isLastPage = true;
-        buildLastPageRows();
-        
-    }
-
-
 }
 
 /**
- * Called when "Last Page" quick button is pressed. Automatically fills in
- * the book's last page in the Current Page field.
+ * Updates the progress display text
  */
-function inputLastPage() {
-    let input = document.getElementById("currentPage");
-    input.value = parseInt(globalPageCount);
-    isLastPage = true;
-    buildLastPageRows();
+function updateProgressDisplay() {
+    const progressText = document.getElementById("progressText");
+    if (progressMode === 'percentage') {
+        const pageEquivalent = Math.round((currentProgressValue / 100) * parseInt(globalPageCount));
+        progressText.textContent = `Equivalent to page ${pageEquivalent} of ${globalPageCount}`;
+    } else {
+        const percentage = Math.round((currentProgressValue / parseInt(globalPageCount)) * 100 * 10) / 10;
+        progressText.textContent = `${percentage}% complete`;
+    }
 }
 
 /**
- * Builds the "Date Finished" field. Only appears when Current Page == page count.
+ * Called when "100%" or "Last Page" quick button is pressed. Automatically fills in
+ * the completion value based on current mode.
  */
-function buildLastPageRows() {
-    let div = document.getElementById("extraPageElements");
+function inputCompleteProgress() {
+    let input = document.getElementById("currentProgress");
+    if (progressMode === 'percentage') {
+        input.value = 100;
+    } else {
+        input.value = parseInt(globalPageCount);
+    }
+    isComplete = true;
+    buildCompletionRows();
+}
+
+/**
+ * Builds the "Date Finished" field. Only appears when progress reaches completion.
+ */
+function buildCompletionRows() {
+    let div = document.getElementById("extraProgressElements");
     div.innerHTML = "";
     let dateFinished = document.createElement("div");
     dateFinished.classList.add("mb-3");
     let details = document.createElement("p");
-    details.innerHTML = "Progress that ends on a book's last page will automatically change the status to <span class='badge bg-purple-lt'>FINISHED</span>. Please enter the date the book was finished."
+    
+    if (progressMode === 'percentage') {
+        details.innerHTML = "Progress that reaches 100% will automatically change the status to <span class='badge bg-purple-lt'>FINISHED</span>. Please enter the date the book was finished.";
+    } else {
+        details.innerHTML = "Progress that ends on a book's last page will automatically change the status to <span class='badge bg-purple-lt'>FINISHED</span>. Please enter the date the book was finished.";
+    }
 
     let input = document.createElement("input");
     input.classList.add("form-control");
@@ -86,8 +226,6 @@ function buildLastPageRows() {
         input.value = globalFinishedDate;
     }
     
-    
-    
     let label = document.createElement("label");
     label.classList.add("form-label", "required");
     label.innerHTML = "Date Finished";
@@ -97,7 +235,6 @@ function buildLastPageRows() {
     dateFinished.append(input);
 
     div.append(dateFinished);
-
 }
 
 /**
@@ -168,7 +305,7 @@ async function submissionHandler() {
 
     let submissionData = gatherSubmissionData()
 
-    if (isLastPage) {
+    if (isComplete) {
         lastPageSubmissionHandler(submissionData.dateFinished);
     }
 
@@ -190,16 +327,16 @@ async function submissionHandler() {
 function validateSubmission() {
     let isValid = true;
 
-    let currentPage = document.getElementById("currentPage");
-    currentPage.classList.remove("is-invalid");
-    validateCurrentPage(true);
+    let currentProgress = document.getElementById("currentProgress");
+    currentProgress.classList.remove("is-invalid");
+    validateCurrentProgress(true);
 
-    if (currentPage.value == "") {
-        currentPage.classList.add("is-invalid");
+    if (currentProgress.value == "") {
+        currentProgress.classList.add("is-invalid");
         isValid = false;
     }
 
-    if (isLastPage) {
+    if (isComplete) {
         let dateEntry = document.getElementById("date");
         dateEntry.classList.remove("is-invalid");
 
@@ -207,7 +344,6 @@ function validateSubmission() {
             dateEntry.classList.add("is-invalid");
             isValid = false;
         }
-
     }
 
     if (shouldCreateJournal) {
@@ -231,9 +367,9 @@ function validateSubmission() {
 function gatherSubmissionData() {
     let data = {};
     
-    data.currentPage = document.getElementById("currentPage").value;
+    data.currentProgress = document.getElementById("currentProgress").value;
 
-    if (isLastPage) {
+    if (isComplete) {
         data.dateFinished = document.getElementById("date").value;
     }
     
@@ -331,8 +467,16 @@ async function journalCreationHandler(title) {
 async function submitProgress(data) {
     let sessionKey = localStorage.getItem("sessionKey");
     let bookListID = getBookIDfromURL();
+    
+    // Convert progress value based on mode
+    let progressValue = parseFloat(data.currentProgress);
+    if (progressMode === 'page') {
+        // Convert page to percentage for storage
+        progressValue = (progressValue / parseInt(globalPageCount)) * 100;
+    }
+    
     let body = {
-        "currentPosition": data.currentPage,
+        "currentPosition": progressValue,
         "journal": data.journal,
         "comment": data.comment
     }
