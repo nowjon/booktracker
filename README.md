@@ -40,6 +40,8 @@ Choose how you want to track your reading progress:
 
 **Docker Compose (recommended)**
 
+> **Note:** Docker images are automatically built and published to GitHub Container Registry (ghcr.io) on every commit to the main branch. The latest image is always available at `ghcr.io/nowjon/booktracker:latest`.
+
 1. Paste this `docker-compose.yml` file into an empty directory, replacing with the correct info where necessary
     
     ```yaml
@@ -47,7 +49,7 @@ Choose how you want to track your reading progress:
 
     services:
         booktracker:
-            image: wars2k/booktracker:latest
+            image: ghcr.io/nowjon/booktracker:latest
             restart: unless-stopped
             volumes:
                 - ./data:/app/external
