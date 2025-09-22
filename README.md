@@ -12,12 +12,29 @@ Using metadata grabbed from Google Books, easily add books and organize them int
 - Add books with metadata provided by the Google Books API.
 - Add books manually without using an external metadata provider.
 - Organize books into collections.
-- Create customer reading/writing challenges and track your progress.
+- Create custom reading/writing challenges and track your progress.
 - Write private journal entries about a book.
 - View book-related statistics like books read per month, etc. 
 - Multi-user support.
 - Import book data and bookshelves from Goodreads.
 - Export data to JSON or CSV.
+- **Dark Mode Support** - Toggle between light and dark themes with a single click.
+- **Flexible Progress Tracking** - Choose between page-based or percentage-based progress tracking for your reading.
+
+## New Features
+
+### 🌙 Dark Mode
+Booktracker now includes a comprehensive dark mode that can be toggled from any page using the moon/sun icon in the navigation bar. The dark mode includes:
+- Dark backgrounds and light text for better readability in low-light conditions
+- Consistent theming across all pages and components
+- Persistent theme preference (remembers your choice across sessions)
+- Smooth transitions between light and dark modes
+
+### 📊 Progress Tracking Options
+Choose how you want to track your reading progress:
+- **Page-based tracking**: Traditional page number tracking (e.g., "I'm on page 150 of 300")
+- **Percentage-based tracking**: Decimal percentage tracking (e.g., "I'm 25.5% through the book")
+- Toggle between modes in Settings to match your preferred reading style
 
 ## Installation
 

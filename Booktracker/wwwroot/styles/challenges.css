@@ -23,17 +23,17 @@
 
 .challengeContent {
     width: 59%;
-    background-color: white;
+    background-color: var(--tblr-bg-surface);
     border-radius: 5px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--tblr-border-color);
     overflow-y: scroll;
 }
 
 .challengeMetadataContainer {
     width: 39%;
-    background-color: white;
+    background-color: var(--tblr-bg-surface);
     border-radius: 5px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--tblr-border-color);
 }
 
 .challengeFooter {

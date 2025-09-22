@@ -12,7 +12,7 @@
 }
 
 #newCollectionForm {
-    background-color: white;
+    background-color: var(--tblr-bg-surface);
     width: 400px;
 }
 

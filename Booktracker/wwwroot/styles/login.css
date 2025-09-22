@@ -1,6 +1,6 @@
 #loginBox {
     width: 300px;
-    background-color: white;
+    background-color: var(--tblr-bg-surface);
     position: absolute;
     left: 0;
     right: 0;
@@ -15,7 +15,7 @@
 
 #registerBox {
     width: 300px;
-    background-color: white;
+    background-color: var(--tblr-bg-surface);
     position: absolute;
     left: 0;
     right: 0;

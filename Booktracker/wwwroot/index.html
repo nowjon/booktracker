@@ -3,6 +3,7 @@
         <link rel="stylesheet" href="styles/styles.css">
         <link rel="stylesheet" href="styles/index.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         
     </body>
 
@@ -19,6 +20,9 @@
             <div class="navbar-nav flex-row order-md-last">
               <div class="nav-item">
                   <div>
+                    <button id="darkModeToggle" class="btn btn-icon" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                        <span class="toggle-icon">dark_mode</span>
+                    </button>
                     <a class="btn" href="search.html">Add New Book</a>
                     <button class="btn" onclick="logOut()">Log Out</button>
                   </div>
@@ -140,6 +144,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
     <script src="src/checkAuth.js"></script>
+    <script src="src/darkMode.js"></script>
     <script src="src/homePage.js"></script>
     
 </html>
