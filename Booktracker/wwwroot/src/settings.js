@@ -1,3 +1,23 @@
+// Make this function globally accessible immediately when script loads
+console.log("Settings.js script loading...");
+
+window.updateProgressModeLabel = function() {
+  const toggle = document.getElementById("progressModeToggle");
+  const label = document.getElementById("progressModeLabel");
+  
+  console.log("updateProgressModeLabel called, toggle.checked:", toggle.checked);
+  
+  if (toggle.checked) {
+    label.textContent = "Percentage Mode";
+  } else {
+    label.textContent = "Page Mode";
+  }
+  
+  console.log("Label text updated to:", label.textContent);
+}
+
+console.log("updateProgressModeLabel function defined:", typeof window.updateProgressModeLabel);
+
 function getExportData(format) {
     let sessionKey = localStorage.getItem("sessionKey");
     fetch(`/api/data/export?format=${format}&sessionKey=${sessionKey}`)
@@ -90,8 +110,33 @@ function displayLoggingLevel(data) {
   document.getElementById("loggingLevel").value = data;
 }
 
-getCurrentLoggingLevel();
-getCurrentProgressMode();
+// Initialize everything when DOM is ready
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("DOM Content Loaded - initializing settings");
+  
+  // Load current settings
+  getCurrentLoggingLevel();
+  getCurrentProgressMode();
+  
+  // Set up the progress mode toggle event listener
+  setupProgressModeToggleListener();
+});
+
+// Add event listener to progress mode toggle to update label immediately
+function setupProgressModeToggleListener() {
+  const progressToggle = document.getElementById("progressModeToggle");
+  console.log("Setting up event listener, toggle found:", !!progressToggle);
+  
+  if (progressToggle) {
+    // Remove any existing event listeners first
+    progressToggle.removeEventListener("change", window.updateProgressModeLabel);
+    // Add the new event listener
+    progressToggle.addEventListener("change", window.updateProgressModeLabel);
+    console.log("Event listener attached to progress mode toggle");
+  } else {
+    console.log("Progress mode toggle not found!");
+  }
+}
 
 function updateLoggingLevel() {
   let sessionKey = localStorage.getItem("sessionKey");
@@ -126,6 +171,7 @@ function displayProgressMode(mode) {
     label.textContent = "Page Mode";
   }
 }
+
 
 function updateProgressMode() {
   let sessionKey = localStorage.getItem("sessionKey");

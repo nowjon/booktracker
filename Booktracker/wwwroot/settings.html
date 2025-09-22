@@ -110,6 +110,19 @@
                             <label class="form-check-label" for="progressModeToggle" id="progressModeLabel">
                               Percentage Mode
                             </label>
+                            <script>
+                              // Attach event listener immediately after the element is created
+                              document.getElementById('progressModeToggle').addEventListener('change', function() {
+                                const toggle = this;
+                                const label = document.getElementById('progressModeLabel');
+                                if (toggle.checked) {
+                                  label.textContent = "Percentage Mode";
+                                } else {
+                                  label.textContent = "Page Mode";
+                                }
+                                console.log("Toggle changed to:", label.textContent);
+                              });
+                            </script>
                           </div>
                           <small class="form-text text-muted">
                             Toggle between tracking progress by page number or percentage. 
